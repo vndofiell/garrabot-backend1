@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GARRABot - Conectar</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #f4f4f4; margin: 0; }
+        .container { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; }
+        button { background-color: #ff4444; color: white; border: none; padding: 15px 35px; font-size: 20px; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: bold; }
+        button:hover { background-color: #cc0000; transform: scale(1.05); }
+        h1 { color: #333; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>GARRABot 🤖</h1>
+        <p>Clique abaixo para entrar com sua conta Deriv.</p>
+        <button id="loginBtn">CONECTAR AGORA</button>
+    </div>
+
+    <script>
+        async function generateChallenge(verifier) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(verifier);
+            const hash = await crypto.subtle.digest('SHA-256', data);
+            return btoa(String.fromCharCode(...new Uint8Array(hash)))
+                .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            // CONFIGURAÇÕES ATUALIZADAS
+            const clientId = '33qw17TW2WM9OqeTqtRaC';
+            const redirectUri = 'https://gentle-duckanoo-8e457f.netlify.app/callback.html';
+            
+            const verifier = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+                .map(b => b.toString(16).padStart(2, '0')).join('');
+            const state = Math.random().toString(36).substring(2);
+
+            sessionStorage.setItem('pkce_verifier', verifier);
+            sessionStorage.setItem('oauth_state', state);
+
+            const challenge = await generateChallenge(verifier);
+
+            const authUrl = `https://auth.deriv.com/oauth2/auth?` + 
+                            `response_type=code` +
+                            `&client_id=${clientId}` +
+                            `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+                            `&state=${state}` +
+                            `&code_challenge=${challenge}` +
+                            `&code_challenge_method=S256` +
+                            `&scope=trade+account_manage`;
+
+            window.location.href = authUrl;
+        });
+    </script>
+</body>
+</html>
