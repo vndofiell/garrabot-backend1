@@ -1,13 +1,14 @@
 {
-  "name": "garrabot-backend",
+  "name": "garrabot-final",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "servidor.js",
   "dependencies": {
     "axios": "^1.6.0",
     "cors": "^2.8.5",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "ws": "^8.14.2"
   },
   "scripts": {
-    "start": "node server.js"
+    "start": "node servidor.js"
   }
 }
