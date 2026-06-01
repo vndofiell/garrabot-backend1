@@ -7,8 +7,10 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// --- DADOS ATUALIZADOS ---
 const CLIENT_ID = '33qw17TW2WM9OqeTqtRaC';
 const REDIRECT_URI = 'https://gentle-duckanoo-8e457f.netlify.app/callback.html';
+// -------------------------
 
 app.post('/auth/deriv', async (req, res) => {
     const { code, verifier } = req.body;
@@ -24,12 +26,11 @@ app.post('/auth/deriv', async (req, res) => {
         const accessToken = response.data.access_token;
         console.log("✅ Token obtido com sucesso!");
 
-        // INICIA O ROBÔ ASSIM QUE O TOKEN CHEGA
         iniciarEstrategiaDoBot(accessToken);
 
         res.json({ status: "sucesso", message: "Bot iniciado!" });
     } catch (error) {
-        console.error("Erro na troca de token:", error.response?.data || error.message);
+        console.error("❌ Erro na troca de token:", error.response?.data || error.message);
         res.status(500).json({ error: "Falha ao obter token" });
     }
 });
@@ -45,16 +46,12 @@ function iniciarEstrategiaDoBot(token) {
 
     ws.on('message', (data) => {
         const response = JSON.parse(data);
-
         if (response.msg_type === 'authorize') {
             console.log("✅ Conta Autorizada! Saldo: " + response.authorize.balance);
-            // Solicita preços em tempo real do Volatility 100
             ws.send(JSON.stringify({ "ticks": "R_100" }));
         }
-
         if (response.msg_type === 'tick') {
             console.log("📈 Preço V100: " + response.tick.quote);
-            // AQUI VOCÊ COLOCA SUA LÓGICA DE COMPRA/VENDA NO FUTURO
         }
     });
 
