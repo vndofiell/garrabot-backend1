@@ -9,12 +9,12 @@
         Conectando ao servidor do bot...
     </p>
     <script>
-        // 1. Pega o código que a Deriv enviou
+        // 1. Pega o código que a Deriv enviou na URL
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
         
-        // 2. Recupera o verificador persistente que salvamos no index.html
-        const verifier = localStorage.getItem('pkce_verifier');
+        // 2. Busca dupla resiliente: tenta ler do localStorage E do sessionStorage
+        const verifier = localStorage.getItem('pkce_verifier') || sessionStorage.getItem('pkce_verifier');
 
         if (code && verifier) {
             // 3. ENVIAR PARA O SEU SERVIDOR NO RENDER
@@ -30,7 +30,9 @@
             .then(data => {
                 // Limpa as chaves de segurança por boas práticas
                 localStorage.removeItem('pkce_verifier');
+                sessionStorage.removeItem('pkce_verifier');
                 localStorage.removeItem('oauth_state');
+                sessionStorage.removeItem('oauth_state');
 
                 alert("✅ GARRABot Conectado com Sucesso!");
                 console.log(data);
