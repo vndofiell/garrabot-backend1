@@ -1,15 +1,15 @@
 <script>
-    // 1. Pega o código e o estado que a Deriv enviou na URL
+    // 1. Pega o codigo e o estado que a Deriv enviou na URL
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     const state = urlParams.get('state');
 
     if (code) {
-        // 2. Redireciona de volta para o Bot Garra apenas com o code e o state.
-        // O site do Bot Garra será responsável por recuperar o 'verifier' do próprio sessionStorage dele.
+        // 2. Redireciona de volta para o Bot Garra apenas com o codigo e o estado.
+        // O proprio site da Manus Space recuperara o 'verifier' da memoria local dele.
         const redirectUrl = `https://botgarra-nnpr7x22.manus.space/callback?code=${code}&state=${state}`;
         window.location.href = redirectUrl;
     } else {
-        alert("❌ Erro: Código de autorização (code) não encontrado na URL.");
+        alert("❌ Erro: Codigo de autorizacao (code) nao encontrado na URL.");
     }
 </script>
