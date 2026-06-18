@@ -1,89 +1,35 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GARRABot - Conectando...</title>
-    <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #f4f4f4; margin: 0; }
-        .container { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; max-width: 400px; }
-        .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: #ff4444; animation: spin 1s linear infinite; margin: 20px auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        h1 { color: #333; font-size: 24px; }
-        p { color: #666; font-size: 16px; line-height: 1.5; }
-        .error { color: #ff4444; font-weight: bold; }
-        .success { color: #4CAF50; font-weight: bold; }
-    </style>
-</head>
-<body>
+<script>
+    // 1. Pega o código que a Deriv enviou
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    
+    // 2. Recupera o verificador permanente que salvamos no index.html (localStorage)
+    const verifier = localStorage.getItem('pkce_verifier');
 
-    <div class="container" id="statusContainer">
-        <h1>GARRABot 🤖</h1>
-        <p id="statusText">Conectando sua conta Deriv ao robô...</p>
-        <div class="spinner" id="spinner"></div>
-    </div>
-
-    <script>
-        async function processLogin() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-
-            // Lê o verificador do sessionStorage ou do localStorage (para máxima segurança de sessão)
-            const verifier = sessionStorage.getItem('pkce_verifier') || localStorage.getItem('pkce_verifier');
-
-            const statusText = document.getElementById('statusText');
-            const spinner = document.getElementById('spinner');
-
-            // Validação
-            if (!code) {
-                showError("Código de autorização não encontrado na URL. Por favor, tente novamente a partir do robô.");
-                return;
-            }
-
-            if (!verifier) {
-                showError("Chave de segurança (verifier) não encontrada no navegador. Certifique-se de que a sessão não foi limpa.");
-                return;
-            }
-
-            try {
-                // Envia os dados para a sua API hospedada no Render
-                const response = await fetch('https://garrabot-servidor-final.onrender.com/auth/deriv', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        code: code,
-                        verifier: verifier
-                    })
-                });
-
-                const result = await response.json();
-
-                if (response.ok && result.status === "sucesso") {
-                    if (spinner) spinner.style.display = 'none';
-                    statusText.className = 'success';
-                    statusText.innerHTML = "✅ Conexão Efetuada com Sucesso!<br><br>Você já pode fechar esta aba e voltar para o seu robô no computador.";
-                } else {
-                    showError(result.error || "Erro ao processar a troca de token no servidor.");
-                }
-
-            } catch (error) {
-                console.error(error);
-                showError("Não foi possível conectar ao servidor do Render. Verifique se o servidor está online.");
-            }
-        }
-
-        function showError(message) {
-            const statusText = document.getElementById('statusText');
-            const spinner = document.getElementById('spinner');
-            if (spinner) spinner.style.display = 'none';
-            statusText.className = 'error';
-            statusText.innerHTML = `❌ Erro: ${message}`;
-        }
-
-        // Executa assim que a página carregar
-        processLogin();
-    </script>
-</body>
-</html>
+    if (code && verifier) {
+        // 3. ENVIAR PARA O SEU SERVIDOR NO RENDER
+        fetch('https://garrabot-servidor-final.onrender.com/auth/deriv', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                code: code,
+                verifier: verifier
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            // Limpa o verificador da memória por segurança após o login
+            localStorage.removeItem('pkce_verifier');
+            localStorage.removeItem('oauth_state');
+            
+            alert("✅ GARRABot Conectado com Sucesso!");
+            console.log(data);
+        })
+        .catch(err => {
+            console.error(err);
+            alert("❌ Erro ao avisar o servidor do bot.");
+        });
+    } else {
+        alert("❌ Erro: Código ou Verificador não encontrados.");
+    }
+</script>
