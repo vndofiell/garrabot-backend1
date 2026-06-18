@@ -1,56 +1,89 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Connecting...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GARRABot - Conectando...</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #f4f4f4; margin: 0; }
+        .container { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; max-width: 400px; }
+        .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: #ff4444; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        h1 { color: #333; font-size: 24px; }
+        p { color: #666; font-size: 16px; line-height: 1.5; }
+        .error { color: #ff4444; font-weight: bold; }
+        .success { color: #4CAF50; font-weight: bold; }
+    </style>
 </head>
 <body>
-    <p style="font-family: sans-serif; text-align: center; margin-top: 50px;">
-        Redirecting back to your bot...
-    </p>
+
+    <div class="container" id="statusContainer">
+        <h1>GARRABot 🤖</h1>
+        <p id="statusText">Conectando sua conta Deriv ao robô...</p>
+        <div class="spinner" id="spinner"></div>
+    </div>
+
     <script>
-        // 1. Obtém o código e o estado que a Deriv enviou
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('code');
-        const state = urlParams.get('state');
+        async function processLogin() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
 
-        // 2. Busca o verificador de segurança de forma resiliente em todas as memórias possíveis
-        const verifier = sessionStorage.getItem('pkce_verifier') || 
-                         localStorage.getItem('pkce_verifier') || 
-                         sessionStorage.getItem('code_verifier') || 
-                         localStorage.getItem('code_verifier');
+            // Lê o verificador do sessionStorage ou do localStorage (para máxima segurança de sessão)
+            const verifier = sessionStorage.getItem('pkce_verifier') || localStorage.getItem('pkce_verifier');
 
-        if (code && verifier) {
-            // Endereço padrão caso o 'state' falhe
-            let targetUrl = "https://botgarra-nnpr7x22.manus.space/api/oauth/callback";
-            
-            // 3. Descodifica dinamicamente o parâmetro 'state' para obter a URL correta do bot
-            try {
-                if (state) {
-                    const decodedState = atob(state);
-                    if (decodedState.startsWith("http")) {
-                        targetUrl = decodedState;
-                    }
-                }
-            } catch (e) {
-                console.error("Error decoding state:", e);
+            const statusText = document.getElementById('statusText');
+            const spinner = document.getElementById('spinner');
+
+            // Validação
+            if (!code) {
+                showError("Código de autorização não encontrado na URL. Por favor, tente novamente a partir do robô.");
+                return;
             }
 
-            // 4. Redireciona de volta para a rota de callback do bot enviando todos os parâmetros necessários
-            const redirectUrl = `${targetUrl}?code=${code}&state=${state}&verifier=${verifier}`;
-            window.location.href = redirectUrl;
-        } else {
-            // Exibe mensagem amigável caso falte alguma chave para depuração
-            document.body.innerHTML = `
-                <div style="font-family: sans-serif; text-align: center; margin-top: 50px;">
-                    <p style="color: red; font-weight: bold; font-size: 16px;">❌ Error: Code or Verifier not found.</p>
-                    <p style="color: #666; font-size: 12px;">
-                        Code: ${code ? "✓ Found" : "✗ Not Found"} | 
-                        Verifier: ${verifier ? "✓ Found" : "✗ Not Found"}
-                    </p>
-                </div>
-            `;
+            if (!verifier) {
+                showError("Chave de segurança (verifier) não encontrada no navegador. Certifique-se de que a sessão não foi limpa.");
+                return;
+            }
+
+            try {
+                // Envia os dados para a sua API hospedada no Render
+                const response = await fetch('https://garrabot-servidor-final.onrender.com/auth/deriv', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        verifier: verifier
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.status === "sucesso") {
+                    if (spinner) spinner.style.display = 'none';
+                    statusText.className = 'success';
+                    statusText.innerHTML = "✅ Conexão Efetuada com Sucesso!<br><br>Você já pode fechar esta aba e voltar para o seu robô no computador.";
+                } else {
+                    showError(result.error || "Erro ao processar a troca de token no servidor.");
+                }
+
+            } catch (error) {
+                console.error(error);
+                showError("Não foi possível conectar ao servidor do Render. Verifique se o servidor está online.");
+            }
         }
+
+        function showError(message) {
+            const statusText = document.getElementById('statusText');
+            const spinner = document.getElementById('spinner');
+            if (spinner) spinner.style.display = 'none';
+            statusText.className = 'error';
+            statusText.innerHTML = `❌ Erro: ${message}`;
+        }
+
+        // Executa assim que a página carregar
+        processLogin();
     </script>
 </body>
 </html>
