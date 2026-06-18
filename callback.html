@@ -1,15 +1,27 @@
-<script>
-    // 1. Pega o codigo e o estado que a Deriv enviou na URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    const state = urlParams.get('state');
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Conectando...</title>
+</head>
+<body>
+    <p style="font-family: sans-serif; text-align: center; margin-top: 50px;">
+        Redirecionando de volta para a plataforma...
+    </p>
+    <script>
+        // 1. Pega o código e o estado que a Deriv enviou na URL para o Netlify
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const state = urlParams.get('state');
 
-    if (code) {
-        // 2. Redireciona de volta para o Bot Garra apenas com o codigo e o estado.
-        // O proprio site da Manus Space recuperara o 'verifier' da memoria local dele.
-        const redirectUrl = `https://botgarra-nnpr7x22.manus.space/callback?code=${code}&state=${state}`;
-        window.location.href = redirectUrl;
-    } else {
-        alert("❌ Erro: Codigo de autorizacao (code) nao encontrado na URL.");
-    }
-</script>
+        if (code) {
+            // 2. Redireciona para a Manus Space apenas com o code e o state.
+            // O próprio site da Manus Space lerá o 'verifier' da memória local dele.
+            const redirectUrl = `https://botgarra-nnpr7x22.manus.space/callback?code=${code}&state=${state}`;
+            window.location.href = redirectUrl;
+        } else {
+            document.body.innerHTML = "<p style='color:red; font-family:sans-serif; text-align:center; margin-top:50px;'>❌ Erro: Código de autorização (code) não encontrado na URL.</p>";
+        }
+    </script>
+</body>
+</html>
