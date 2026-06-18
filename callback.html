@@ -2,34 +2,16 @@
     // 1. Pega o código que a Deriv enviou
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
+    const state = urlParams.get('state');
     
-    // 2. Recupera o verificador que Deriv devolveu na URL
-    const verifier = urlParams.get('verifier');
+    // 2. Recupera o verificador que salvamos no sessionStorage
+    const verifier = sessionStorage.getItem('pkce_verifier');
 
     if (code && verifier) {
-        // 3. ENVIAR PARA O SERVIDOR NO RENDER
-        fetch('https://garrabot-servidor-final.onrender.com/auth/deriv', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                code: code,
-                verifier: verifier
-            } )
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.token) {
-                // 4. Redireciona para a plataforma Bot Garra com o token
-                window.location.href = `https://botgarra-nnpr7x22.manus.space/?token=${data.token}`;
-            } else {
-                alert("❌ Erro: " + (data.error || "Token não recebido" ));
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            alert("❌ Erro ao avisar o servidor: " + err.message);
-        });
+        // 3. Redireciona de volta para a plataforma Bot Garra com código + verifier
+        const redirectUrl = `https://botgarra-nnpr7x22.manus.space/callback?code=${code}&state=${state}&verifier=${verifier}`;
+        window.location.href = redirectUrl;
     } else {
-        alert("❌ Erro: code=" + code + ", verifier=" + verifier);
+        alert("❌ Erro: code=" + code + ", verifier=" + verifier );
     }
 </script>
