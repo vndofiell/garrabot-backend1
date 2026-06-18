@@ -3,8 +3,8 @@
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     
-    // 2. Recupera o verificador que salvamos
-    const verifier = sessionStorage.getItem('pkce_verifier');
+    // 2. Recupera o verificador que Deriv devolveu na URL
+    const verifier = urlParams.get('verifier');
 
     if (code && verifier) {
         // 3. ENVIAR PARA O SERVIDOR NO RENDER
@@ -27,9 +27,9 @@
         })
         .catch(err => {
             console.error(err);
-            alert("❌ Erro ao avisar o servidor do bot: " + err.message);
+            alert("❌ Erro ao avisar o servidor: " + err.message);
         });
     } else {
-        alert("❌ Erro: Código=" + code + ", Verifier=" + verifier);
+        alert("❌ Erro: code=" + code + ", verifier=" + verifier);
     }
 </script>
