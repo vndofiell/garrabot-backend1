@@ -30,7 +30,6 @@
         }
 
         document.getElementById('loginBtn').addEventListener('click', async () => {
-            // CONFIGURAÇÕES ATUALIZADAS
             const clientId = '33qw17TW2WM9OqeTqtRaC';
             const redirectUri = 'https://gentle-duckanoo-8e457f.netlify.app/callback.html';
             
@@ -38,7 +37,7 @@
                 .map(b => b.toString(16).padStart(2, '0')).join('');
             const state = Math.random().toString(36).substring(2);
 
-            // Armazenamento seguro de forma permanente nas abas usando localStorage
+            // Armazenamento persistente nas abas com localStorage
             localStorage.setItem('pkce_verifier', verifier);
             localStorage.setItem('oauth_state', state);
 
