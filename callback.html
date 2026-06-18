@@ -1,17 +1,15 @@
 <script>
-    // 1. Pega o código que a Deriv enviou
+    // 1. Pega o código e o estado que a Deriv enviou na URL
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     const state = urlParams.get('state');
-    
-    // 2. Recupera o verificador que salvamos no sessionStorage
-    const verifier = sessionStorage.getItem('pkce_verifier');
 
-    if (code && verifier) {
-        // 3. Redireciona de volta para a plataforma Bot Garra com código + verifier
-        const redirectUrl = `https://botgarra-nnpr7x22.manus.space/callback?code=${code}&state=${state}&verifier=${verifier}`;
+    if (code) {
+        // 2. Redireciona de volta para o Bot Garra apenas com o code e o state.
+        // O site do Bot Garra será responsável por recuperar o 'verifier' do próprio sessionStorage dele.
+        const redirectUrl = `https://botgarra-nnpr7x22.manus.space/callback?code=${code}&state=${state}`;
         window.location.href = redirectUrl;
     } else {
-        alert("❌ Erro: code=" + code + ", verifier=" + verifier );
+        alert("❌ Erro: Código de autorização (code ) não encontrado na URL.");
     }
 </script>
