@@ -1,35 +1,47 @@
-<script>
-    // 1. Pega o código que a Deriv enviou
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    
-    // 2. Recupera o verificador permanente que salvamos no index.html (localStorage)
-    const verifier = localStorage.getItem('pkce_verifier');
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>GARRABot - Conectando...</title>
+</head>
+<body>
+    <p style="font-family: sans-serif; text-align: center; margin-top: 50px;">
+        Conectando ao servidor do bot...
+    </p>
+    <script>
+        // 1. Pega o código que a Deriv enviou
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        
+        // 2. Recupera o verificador persistente que salvamos no index.html
+        const verifier = localStorage.getItem('pkce_verifier');
 
-    if (code && verifier) {
-        // 3. ENVIAR PARA O SEU SERVIDOR NO RENDER
-        fetch('https://garrabot-servidor-final.onrender.com/auth/deriv', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                code: code,
-                verifier: verifier
+        if (code && verifier) {
+            // 3. ENVIAR PARA O SEU SERVIDOR NO RENDER
+            fetch('https://garrabot-servidor-final.onrender.com/auth/deriv', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    code: code,
+                    verifier: verifier
+                })
             })
-        })
-        .then(res => res.json())
-        .then(data => {
-            // Limpa o verificador da memória por segurança após o login
-            localStorage.removeItem('pkce_verifier');
-            localStorage.removeItem('oauth_state');
-            
-            alert("✅ GARRABot Conectado com Sucesso!");
-            console.log(data);
-        })
-        .catch(err => {
-            console.error(err);
-            alert("❌ Erro ao avisar o servidor do bot.");
-        });
-    } else {
-        alert("❌ Erro: Código ou Verificador não encontrados.");
-    }
-</script>
+            .then(res => res.json())
+            .then(data => {
+                // Limpa as chaves de segurança por boas práticas
+                localStorage.removeItem('pkce_verifier');
+                localStorage.removeItem('oauth_state');
+
+                alert("✅ GARRABot Conectado com Sucesso!");
+                console.log(data);
+            })
+            .catch(err => {
+                console.error(err);
+                alert("❌ Erro ao avisar o servidor do bot.");
+            });
+        } else {
+            alert("❌ Erro: Código ou Verificador não encontrados.");
+        }
+    </script>
+</body>
+</html>
