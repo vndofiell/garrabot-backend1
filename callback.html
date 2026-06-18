@@ -9,11 +9,11 @@
         Conectando ao servidor do bot...
     </p>
     <script>
-        // 1. Pega o código que a Deriv enviou na URL
+        // 1. Pega o código que a Deriv enviou
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
         
-        // 2. Busca dupla resiliente: tenta ler do localStorage E do sessionStorage
+        // 2. Busca dupla nas memórias
         const verifier = localStorage.getItem('pkce_verifier') || sessionStorage.getItem('pkce_verifier');
 
         if (code && verifier) {
@@ -28,21 +28,25 @@
             })
             .then(res => res.json())
             .then(data => {
-                // Limpa as chaves de segurança por boas práticas
                 localStorage.removeItem('pkce_verifier');
                 sessionStorage.removeItem('pkce_verifier');
-                localStorage.removeItem('oauth_state');
-                sessionStorage.removeItem('oauth_state');
-
                 alert("✅ GARRABot Conectado com Sucesso!");
-                console.log(data);
             })
             .catch(err => {
                 console.error(err);
                 alert("❌ Erro ao avisar o servidor do bot.");
             });
         } else {
-            alert("❌ Erro: Código ou Verificador não encontrados.");
+            // 🔍 CÓDIGO DE DIAGNÓSTICO: Mostra exatamente o que há na memória do seu navegador
+            const localKeys = Object.keys(localStorage).join(", ") || "vazio";
+            const sessionKeys = Object.keys(sessionStorage).join(", ") || "vazio";
+            
+            alert(`❌ Erro: Verificador não encontrado.\n\n` +
+                  `DIAGNÓSTICO DO SEU NAVEGADOR:\n` +
+                  `• Código na URL: ${code ? "✓ Encontrado" : "✗ Não encontrado"}\n` +
+                  `• Chaves no LocalStorage: [${localKeys}]\n` +
+                  `• Chaves no SessionStorage: [${sessionKeys}]\n\n` +
+                  `Por favor, me diga o que apareceu escrito neste alerta!`);
         }
     </script>
 </body>
