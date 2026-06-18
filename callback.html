@@ -1,6 +1,6 @@
 <script>
     // 1. Pega o código que a Deriv enviou
-    const urlParams = new URLSearchParams(window.location.search );
+    const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     
     // 2. Recupera o verificador que salvamos
@@ -27,9 +27,9 @@
         })
         .catch(err => {
             console.error(err);
-            alert("❌ Erro ao avisar o servidor do bot.");
+            alert("❌ Erro ao avisar o servidor do bot: " + err.message);
         });
     } else {
-        alert("❌ Erro: Código ou Verificador não encontrados.");
+        alert("❌ Erro: Código=" + code + ", Verifier=" + verifier);
     }
 </script>
