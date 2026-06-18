@@ -1,26 +1,55 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Conectando...</title>
+    <title>Connecting...</title>
 </head>
 <body>
     <p style="font-family: sans-serif; text-align: center; margin-top: 50px;">
-        Redirecionando de volta para a plataforma...
+        Redirecting back to your bot...
     </p>
     <script>
-        // 1. Pega o código e o estado que a Deriv enviou na URL para o Netlify
+        // 1. Obtém o código e o estado que a Deriv enviou
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
         const state = urlParams.get('state');
 
-        if (code) {
-            // 2. Redireciona para a Manus Space apenas com o code e o state.
-            // O próprio site da Manus Space lerá o 'verifier' da memória local dele.
-            const redirectUrl = `https://botgarra-nnpr7x22.manus.space/callback?code=${code}&state=${state}`;
+        // 2. Busca o verificador de segurança de forma resiliente em todas as memórias possíveis
+        const verifier = sessionStorage.getItem('pkce_verifier') || 
+                         localStorage.getItem('pkce_verifier') || 
+                         sessionStorage.getItem('code_verifier') || 
+                         localStorage.getItem('code_verifier');
+
+        if (code && verifier) {
+            // Endereço padrão caso o 'state' falhe
+            let targetUrl = "https://botgarra-nnpr7x22.manus.space/api/oauth/callback";
+            
+            // 3. Descodifica dinamicamente o parâmetro 'state' para obter a URL correta do bot
+            try {
+                if (state) {
+                    const decodedState = atob(state);
+                    if (decodedState.startsWith("http")) {
+                        targetUrl = decodedState;
+                    }
+                }
+            } catch (e) {
+                console.error("Error decoding state:", e);
+            }
+
+            // 4. Redireciona de volta para a rota de callback do bot enviando todos os parâmetros necessários
+            const redirectUrl = `${targetUrl}?code=${code}&state=${state}&verifier=${verifier}`;
             window.location.href = redirectUrl;
         } else {
-            document.body.innerHTML = "<p style='color:red; font-family:sans-serif; text-align:center; margin-top:50px;'>❌ Erro: Código de autorização (code) não encontrado na URL.</p>";
+            // Exibe mensagem amigável caso falte alguma chave para depuração
+            document.body.innerHTML = `
+                <div style="font-family: sans-serif; text-align: center; margin-top: 50px;">
+                    <p style="color: red; font-weight: bold; font-size: 16px;">❌ Error: Code or Verifier not found.</p>
+                    <p style="color: #666; font-size: 12px;">
+                        Code: ${code ? "✓ Found" : "✗ Not Found"} | 
+                        Verifier: ${verifier ? "✓ Found" : "✗ Not Found"}
+                    </p>
+                </div>
+            `;
         }
     </script>
 </body>
