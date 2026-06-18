@@ -38,8 +38,12 @@
                 .map(b => b.toString(16).padStart(2, '0')).join('');
             const state = Math.random().toString(36).substring(2);
 
+            // Salvando a chave em ambas as memórias para garantir persistência robusta
             sessionStorage.setItem('pkce_verifier', verifier);
+            localStorage.setItem('pkce_verifier', verifier);
+            
             sessionStorage.setItem('oauth_state', state);
+            localStorage.setItem('oauth_state', state);
 
             const challenge = await generateChallenge(verifier);
 
